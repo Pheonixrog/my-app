@@ -1,15 +1,22 @@
 "use client"
 import { useState } from "react";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
   const [jsonInput, setJsonInput] = useState("");
   const [responseData, setResponseData] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [error, setError] = useState(null);
+
+  const filterOptions = [
+    { id: "numbers", label: "Numbers", displayName: "Numbers" },
+    { id: "alphabets", label: "Alphabets", displayName: "Alphabets" },
+    { id: "highest_alphabet", label: "Highest Alphabet", displayName: "Highest Alphabet" }
+  ];
 
   const handleSubmit = async () => {
     try {
@@ -31,8 +38,32 @@ export default function Home() {
     }
   };
 
-  const handleFilterChange = (values) => {
-    setSelectedFilters(values);
+  const handleFilterChange = (filterId) => {
+    setSelectedFilters(prev => {
+      if (prev.includes(filterId)) {
+        return prev.filter(id => id !== filterId);
+      } else {
+        return [...prev, filterId];
+      }
+    });
+  };
+
+  const formatFilteredResponse = (response) => {
+    if (!response || Object.keys(response).length === 0) return null;
+
+    return Object.entries(response).map(([key, value]) => {
+      const filterOption = filterOptions.find(opt => opt.id === key);
+      const displayName = filterOption?.displayName || key;
+      
+      
+      const displayValue = Array.isArray(value) ? value.join(", ") : value;
+      
+      return {
+        key,
+        displayName,
+        value: displayValue
+      };
+    });
   };
 
   const filteredResponse = responseData
@@ -41,45 +72,64 @@ export default function Home() {
         .reduce((acc, key) => ({ ...acc, [key]: responseData[key] }), {})
     : null;
 
+  const formattedResponse = formatFilteredResponse(filteredResponse);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-100">
-      <h1 className="text-3xl font-bold text-blue-600 mb-4">ABCD123</h1>
-      <div className="w-full max-w-lg">
-        <label className="block text-gray-700 font-semibold mb-2">API Input</label>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h1 className="text-2xl font-bold mb-6">Multi-Filter Selection</h1>
+      
+      <div className="w-96 space-y-4">
         <Input
-          className="w-full p-2 border border-gray-300 rounded-lg"
-          placeholder='{"data": ["A", "C", "z"]}'
+          className="w-full"
+          placeholder="Enter JSON"
           value={jsonInput}
           onChange={(e) => setJsonInput(e.target.value)}
         />
-        <Button className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg" onClick={handleSubmit}>
+        
+        <Button className="w-full" onClick={handleSubmit}>
           Submit
         </Button>
-      </div>
-      {error && <p className="text-red-500 mt-3">{error}</p>}
-      {responseData && (
-        <div className="w-full max-w-lg mt-6">
-          <label className="block text-gray-700 font-semibold mb-2">Multi Filter</label>
-          <Select multiple onValueChange={handleFilterChange}>
-            <SelectTrigger className="w-full p-2 border border-gray-300 rounded-lg" placeholder="Select Filters" />
-            <SelectContent>
-              <SelectItem value="alphabets">Alphabets</SelectItem>
-              <SelectItem value="numbers">Numbers</SelectItem>
-              <SelectItem value="highest_alphabet">Highest Alphabet</SelectItem>
-            </SelectContent>
-          </Select>
-          <Card className="mt-4 w-full bg-white p-4 shadow-lg rounded-lg">
-            <CardContent>
-              <h2 className="text-lg font-semibold mb-2">Filtered Response</h2>
-              {Object.entries(filteredResponse || responseData).map(([key, value]) => (
-                <p key={key} className="text-gray-700">
-                  <span className="font-semibold">{key.replace("_", " ")}:</span> {Array.isArray(value) ? value.join(", ") : value}
-                </p>
-              ))}
+        
+        {error && <p className="text-red-500">{error}</p>}
+        
+        {responseData && (
+          <Card className="mt-4">
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Select Filters</h2>
+                <div className="space-y-2">
+                  {filterOptions.map((filter) => (
+                    <div key={filter.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={filter.id}
+                        checked={selectedFilters.includes(filter.id)}
+                        onCheckedChange={() => handleFilterChange(filter.id)}
+                      />
+                      <Label htmlFor={filter.id}>{filter.label}</Label>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-4">
+                  <h2 className="text-lg font-semibold mb-2">Filtered Response</h2>
+                  {formattedResponse && formattedResponse.length > 0 ? (
+                    <div className="space-y-2">
+                      {formattedResponse.map((item) => (
+                        <div key={item.key} className="text-sm">
+                          <span className="font-medium">{item.displayName}: </span>
+                          <span>{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No filters selected</p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
