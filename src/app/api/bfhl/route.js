@@ -4,12 +4,12 @@ const USER_ID = "Rishabh Katiyar";
 const EMAIL = "22BCS10594@cuchd.in";
 const ROLL_NUMBER = "22BCS10594";
 
-// Handle GET request
+
 export async function GET() {
   return NextResponse.json({ operation_code: 1 }, { status: 200 });
 }
 
-// Handle POST request
+
 export async function POST(req) {
   try {
     const body = await req.json();
