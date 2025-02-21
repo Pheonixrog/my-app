@@ -76,7 +76,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-6">Multi-Filter Selection</h1>
+      <h1 className="text-2xl font-bold mb-6">API input</h1>
       
       <div className="w-96 space-y-4">
         <Input
@@ -96,7 +96,7 @@ export default function Home() {
           <Card className="mt-4">
             <CardContent className="p-4">
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Select Filters</h2>
+                <h2 className="text-lg font-semibold">Select Multiple Filters</h2>
                 <div className="space-y-2">
                   {filterOptions.map((filter) => (
                     <div key={filter.id} className="flex items-center space-x-2">
